@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AM Core - Premium Panel</title>
+    <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Space+Grotesk:wght@500;700&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg: #fff6e5; --paper: #ffffff; --ink: #0d0d0d; --placeholder: rgba(13, 13, 13, 0.5);
+            --yellow: #ffd23f; --pink: #ff8fab; --mint: #7be495; --red: #ff5a5f; --purple: #c3a6ff;
+            --brand-main: #ffd23f; --brand-accent: #00E5FF;
+            --spotify-green: #1DB954; --tiktok-red: #ff0050; --tiktok-cyan: #00f2ea; --am-blue: #00E5FF; --am-dark: #223A5E;
+            --bd: 3px solid var(--ink); --sh-s: 3px 3px 0 var(--ink); --sh: 5px 5px 0 var(--ink); --sh-l: 8px 8px 0 var(--ink);
+            --font-display: 'Archivo Black', sans-serif; --font-body: 'Space Grotesk', sans-serif; --font-mono: 'JetBrains Mono', monospace;
+        }
+
+        body.theme-default { --bg: #fff6e5; --paper: #ffffff; --ink: #0d0d0d; --brand-main: #ffd23f; --brand-accent: #00E5FF; }
+        body.theme-am { --bg: #e6f9ff; --paper: #ffffff; --ink: #0d0d0d; --brand-main: #00E5FF; --brand-accent: #223A5E; }
+        body.theme-spotify { --bg: #e8f8ee; --paper: #ffffff; --ink: #0d0d0d; --brand-main: #1DB954; --brand-accent: #121212; }
+        body.theme-tiktok {
+            --bg: #0f1015; --paper: #1a1c23; --ink: #ffffff; --placeholder: rgba(255, 255, 255, 0.5);
+            --brand-main: #ff0050; --brand-accent: #00f2ea;
+            --bd: 3px solid #ffffff; --sh-s: 3px 3px 0 #00f2ea; --sh: 5px 5px 0 #ff0050; --sh-l: 8px 8px 0 #00f2ea;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: var(--font-body); background-color: var(--bg); color: var(--ink);
+            width: 100vw; min-height: 100vh; overflow-x: hidden; transition: background-color 0.3s ease, color 0.3s ease;
+            background-image: linear-gradient(rgba(255, 255, 255, 0.05) 1.5px, transparent 1.5px), linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1.5px, transparent 1.5px);
+            background-size: 34px 34px;
+        }
+
+        .bg-toys { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; overflow: hidden; }
+        .toy { position: absolute; opacity: 0.7; filter: drop-shadow(4px 4px 0 var(--ink)); }
+        
+        @keyframes float1 { 0%, 100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-40px) rotate(15deg); } }
+        @keyframes float2 { 0%, 100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-60px) rotate(-20deg); } }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        .toy.am-logo { top: 10%; left: 5%; width: 80px; animation: float1 8s ease-in-out infinite; }
+        .toy.spotify { top: 15%; right: 8%; width: 90px; animation: float2 10s ease-in-out infinite; }
+        .toy.tiktok { bottom: 15%; left: 8%; width: 80px; animation: float1 9s ease-in-out infinite; }
+        .toy.bintang { bottom: 20%; right: 5%; width: 70px; animation: float1 7s ease-in-out infinite reverse; fill: var(--yellow); }
+
+        .container { width: 100%; min-height: 100vh; padding: 20px 16px 100px; display: flex; flex-direction: column; position: relative; z-index: 10; }
+
+        #loginBox {
+            background: var(--paper); border: var(--bd); border-radius: 24px; box-shadow: 10px 10px 0 var(--ink); padding: 44px 28px 36px;
+            display: none; width: 100%; max-width: 440px; margin: auto; position: relative; overflow: hidden; animation: popIn 0.4s ease-out forwards;
+        }
+
+        @keyframes popIn { 0% { transform: scale(0.85) translateY(30px); opacity: 0; } 100% { transform: scale(1) translateY(0); opacity: 1; } }
+
+        .login-badge-tag {
+            position: absolute; top: 16px; right: -28px; background: var(--yellow); color: #0d0d0d;
+            font-family: var(--font-mono); font-size: 10px; font-weight: 900; padding: 4px 30px; transform: rotate(25deg);
+            border: 2px solid #0d0d0d; box-shadow: 2px 2px 0 #0d0d0d; letter-spacing: 1px; text-transform: uppercase;
+        }
+
+        .login-header { text-align: center; margin-bottom: 28px; }
+        .login-icon-badge { width: 64px; height: 64px; background: var(--yellow); border: var(--bd); border-radius: 18px; display: grid; place-items: center; margin: 0 auto 16px; box-shadow: 4px 4px 0 var(--ink); }
+        .login-icon-badge svg { width: 32px; height: 32px; fill: #0d0d0d; }
+        .login-header h1 { font-family: var(--font-display); font-size: 30px; margin-bottom: 6px; color: var(--ink); }
+        .login-header p { font-family: var(--font-body); font-weight: 700; font-size: 14px; opacity: 0.8; color: var(--ink); }
+
+        .shake-error { animation: shakeGlitch 0.45s cubic-bezier(.36,.07,.19,.97) both; }
+        @keyframes shakeGlitch { 10%, 90% { transform: translate3d(-3px, 0, 0); } 20%, 80% { transform: translate3d(5px, 0, 0); } 30%, 50%, 70% { transform: translate3d(-7px, 0, 0); } 40%, 60% { transform: translate3d(7px, 0, 0); } }
+
+        .form-group { margin-bottom: 18px; position: relative; }
+        label { font-family: var(--font-mono); font-size: 11px; font-weight: 800; display: block; margin-bottom: 8px; letter-spacing: 0.8px; color: var(--ink); }
+        .input-wrapper { position: relative; display: flex; align-items: center; }
+        .input-icon { position: absolute; left: 16px; width: 20px; height: 20px; stroke: var(--ink); stroke-width: 2.5; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+
+        input, textarea {
+            width: 100%; padding: 16px 16px 16px 48px; background: var(--paper); border: var(--bd); border-radius: 14px;
+            font-family: var(--font-body); font-size: 15px; font-weight: 700; color: var(--ink) !important; outline: none; transition: all 0.2s ease;
+        }
+        
+        input::placeholder, textarea::placeholder { color: var(--placeholder); opacity: 1; }
+        textarea { padding-left: 16px; }
+
+        input:focus, textarea:focus { background: var(--paper) !important; color: var(--ink) !important; box-shadow: 4px 4px 0 var(--ink); transform: translate(-2px, -2px); border-color: var(--brand-accent); }
+
+        .toggle-pass { position: absolute; right: 14px; background: transparent; border: none; cursor: pointer; padding: 4px; display: grid; place-items: center; opacity: 0.7; color: var(--ink); }
+        .toggle-pass svg { width: 22px; height: 22px; stroke: var(--ink); stroke-width: 2; fill: none; }
+        .input-error { animation: shakeGlitch 0.3s; border-color: var(--red) !important; background: #ffe5e5 !important; color: #000 !important; }
+
+        .btn {
+            width: 100%; padding: 16px; border: var(--bd); border-radius: 14px; font-family: var(--font-body); font-size: 16px; font-weight: 800;
+            cursor: pointer; box-shadow: var(--sh-s); transition: all 0.15s ease; display: flex; justify-content: center; align-items: center; gap: 10px; text-decoration: none; color: var(--ink);
+        }
+        .btn:hover { transform: translate(-3px, -3px); box-shadow: var(--sh); }
+        .btn:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--ink); }
+        .btn:disabled { opacity: 0.7; cursor: not-allowed; transform: none; }
+        
+        .btn-login { background: var(--yellow); color: #0d0d0d; margin-top: 10px; font-size: 17px; }
+        .btn-send { background: var(--mint); color: #0d0d0d; }
+        .btn-verify { background: var(--brand-accent); color: #0d0d0d; }
+        .btn-spotify { background: var(--spotify-green); color: #fff; }
+        .btn-tiktok { background: var(--tiktok-red); color: #fff; border-color: #ffffff; }
+
+        .spinner { width: 18px; height: 18px; border: 3px solid rgba(0,0,0,0.2); border-top-color: var(--ink); border-radius: 50%; animation: spin 0.8s linear infinite; display: inline-block; }
+
+        #panelBox { display: none; flex-direction: column; gap: 20px; width: 100%; max-width: 600px; margin: 0 auto; animation: slideUp 0.3s ease-out; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        .top-header { display: flex; justify-content: space-between; align-items: center; background: var(--brand-main); border: var(--bd); border-radius: 14px; padding: 14px 20px; box-shadow: var(--sh-s); color: var(--ink); }
+        .top-header .brand { font-family: var(--font-display); font-size: 20px; text-transform: uppercase; display: flex; align-items: center; gap: 10px; color: #000; }
+        .top-header .brand span.icon { background: var(--paper); border: 2px solid var(--ink); width: 32px; height: 32px; display: grid; place-items: center; border-radius: 8px; }
+        .top-header .brand span.icon svg { width: 18px; height: 18px; fill: var(--ink); }
+        .header-actions { display: flex; align-items: center; gap: 10px; }
+
+        .user-profile { display: flex; align-items: center; gap: 10px; background: var(--paper); border: 2px solid var(--ink); padding: 6px 14px 6px 6px; border-radius: 20px; box-shadow: 2px 2px 0 var(--ink); font-weight: 700; font-size: 14px; color: var(--ink); }
+        .avatar { width: 30px; height: 30px; background: var(--purple); border: 2px solid var(--ink); border-radius: 50%; display: grid; place-items: center; font-family: var(--font-display); font-size: 14px; color: #0d0d0d; }
+        .settings-btn { background: var(--paper); border: 2px solid var(--ink); width: 42px; height: 42px; border-radius: 12px; display: grid; place-items: center; cursor: pointer; box-shadow: 2px 2px 0 var(--ink); transition: all 0.15s; color: var(--ink); }
+        .settings-btn:hover { transform: translate(-2px, -2px); box-shadow: 4px 4px 0 var(--ink); }
+        .settings-btn svg { width: 20px; height: 20px; }
+
+        .hero-card { background: var(--brand-main); border: var(--bd); border-radius: 18px; padding: 24px; box-shadow: var(--sh); position: relative; overflow: hidden; color: #000; }
+        .hero-card h2 { font-family: var(--font-display); font-size: 26px; line-height: 1.2; margin-bottom: 6px; }
+        .hero-card h2 mark { background: var(--paper); padding: 2px 10px; border: var(--bd); border-radius: 8px; box-shadow: var(--sh-s); display: inline-block; transform: rotate(-2deg); color: var(--ink); }
+        .hero-card p { font-weight: 700; font-size: 13px; opacity: 0.95; color: #000; }
+
+        .tabs { display: flex; gap: 8px; background: var(--paper); padding: 8px; border: var(--bd); border-radius: 14px; box-shadow: var(--sh-s); width: 100%; }
+        .tab-btn { flex: 1; padding: 12px 6px; background: transparent; border: 2px solid transparent; font-family: var(--font-body); font-weight: 700; font-size: 14px; border-radius: 10px; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; color: var(--ink); }
+        .tab-btn svg { width: 20px; height: 20px; flex-shrink: 0; }
+        .tab-btn.active { border: var(--bd); box-shadow: 2px 2px 0 var(--ink); }
+        .tab-btn.active.am { background: var(--am-blue); color: #0d0d0d; }
+        .tab-btn.active.spotify { background: var(--spotify-green); color: #fff; }
+        .tab-btn.active.tiktok { background: var(--tiktok-red); color: #fff; }
+
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        .card-form { background: var(--paper); border: var(--bd); border-radius: 18px; padding: 24px; box-shadow: var(--sh); margin-bottom: 16px; color: var(--ink); }
+        .step-title { display: flex; align-items: center; gap: 12px; font-family: var(--font-display); font-size: 17px; margin-bottom: 8px; color: var(--ink); }
+        .step-num { width: 28px; height: 28px; background: var(--brand-accent); color: #0d0d0d; border-radius: 50%; display: grid; place-items: center; font-family: var(--font-mono); font-size: 13px; flex-shrink: 0; font-weight: bold; }
+        .hint { font-size: 13px; font-weight: 500; opacity: 0.85; margin-bottom: 16px; line-height: 1.4; color: var(--ink); }
+
+        .result-card { display: none; background: var(--paper); border: var(--bd); border-radius: 16px; padding: 16px; margin-top: 16px; box-shadow: var(--sh-s); color: var(--ink); }
+        .res-header { display: flex; gap: 14px; align-items: center; margin-bottom: 16px; }
+        .res-thumb { width: 80px; height: 80px; border-radius: 12px; border: var(--bd); object-fit: cover; box-shadow: 2px 2px 0 var(--ink); flex-shrink: 0; }
+        .res-info h5 { font-family: var(--font-display); font-size: 15px; line-height: 1.3; margin-bottom: 4px; color: var(--ink); }
+        .res-info p { font-size: 12px; font-weight: 700; opacity: 0.8; color: var(--ink); }
+        .res-actions { display: flex; flex-direction: column; gap: 8px; }
+
+        .video-wrapper { width: 100%; margin-bottom: 14px; border: var(--bd); border-radius: 14px; overflow: hidden; background: #000; box-shadow: var(--sh-s); }
+        .video-wrapper video { width: 100%; max-height: 380px; display: block; outline: none; object-fit: contain; }
+
+        .photo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; max-height: 250px; overflow-y: auto; padding: 10px; border: var(--bd); border-radius: 12px; background: rgba(0,0,0,0.1); margin-bottom: 14px; }
+        .photo-item { position: relative; border-radius: 10px; overflow: hidden; border: 2px solid var(--ink); box-shadow: 2px 2px 0 var(--ink); }
+        .photo-item img { width: 100%; height: 100px; object-fit: cover; display: block; }
+        .photo-item a { position: absolute; bottom: 0; left: 0; width: 100%; background: var(--yellow); color: #000; text-align: center; font-size: 10px; font-family: var(--font-mono); font-weight: 900; padding: 4px 0; text-decoration: none; border-top: 2px solid var(--ink); }
+
+        .history-top-bar { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; padding: 4px 0; }
+        .hist-title-group h1 { font-family: var(--font-display); font-size: 28px; letter-spacing: -0.5px; color: var(--ink); }
+        .hist-title-group p { font-family: var(--font-body); font-size: 13px; font-weight: 700; opacity: 0.7; color: var(--ink); }
+        
+        .btn-edit-hist { background: var(--paper); border: var(--bd); border-radius: 8px; padding: 6px 16px; font-family: var(--font-mono); font-weight: 900; font-size: 11px; cursor: pointer; box-shadow: 2px 2px 0 var(--ink); color: var(--ink); transition: 0.15s; }
+        .btn-edit-hist:active { transform: translate(1px, 1px); box-shadow: 1px 1px 0 var(--ink); }
+
+        .history-list { display: flex; flex-direction: column; gap: 12px; }
+        .history-card { background: var(--paper); border: var(--bd); border-radius: 16px; padding: 14px 16px; box-shadow: var(--sh-s); display: flex; align-items: center; gap: 14px; position: relative; transition: transform 0.2s; }
+        .history-card:hover { transform: translate(-2px, -2px); box-shadow: var(--sh); }
+        .hist-thumb-box { width: 60px; height: 60px; border-radius: 10px; border: 2px solid var(--ink); overflow: hidden; flex-shrink: 0; background: var(--bg); display: grid; place-items: center; }
+        .hist-thumb-box img { width: 100%; height: 100%; object-fit: cover; }
+        .hist-thumb-box svg { width: 28px; height: 28px; fill: var(--ink); }
+        .hist-info { flex: 1; min-width: 0; }
+        .hist-item-title { font-family: var(--font-body); font-weight: 800; font-size: 14px; line-height: 1.3; color: var(--ink); text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 4px; }
+        .hist-meta { display: flex; align-items: center; gap: 8px; }
+        .hist-date { font-family: var(--font-mono); font-size: 11px; font-weight: 700; opacity: 0.7; color: var(--ink); }
+        .hist-badge { font-family: var(--font-mono); font-size: 9px; font-weight: 900; padding: 2px 6px; border-radius: 6px; border: 1px solid var(--ink); text-transform: uppercase; }
+        .hist-badge.am { background: var(--am-blue); color: #000; }
+        .hist-badge.spotify { background: var(--spotify-green); color: #fff; }
+        .hist-badge.tiktok { background: var(--tiktok-red); color: #fff; }
+
+        .hist-action-btn { background: var(--yellow); color: #000; border: 2px solid var(--ink); width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; text-decoration: none; box-shadow: 2px 2px 0 var(--ink); cursor: pointer; flex-shrink: 0; }
+        .hist-action-btn svg { width: 16px; height: 16px; stroke: #000; stroke-width: 2.5; fill: none; }
+
+        .empty-hist { text-align: center; padding: 40px 20px; background: var(--paper); border: var(--bd); border-radius: 18px; box-shadow: var(--sh-s); color: var(--ink); }
+        .empty-hist svg { width: 48px; height: 48px; margin-bottom: 12px; stroke: var(--ink); stroke-width: 2; fill: none; opacity: 0.6; }
+        .empty-hist p { font-family: var(--font-body); font-weight: 700; font-size: 14px; opacity: 0.8; }
+
+        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100vw; background: var(--paper); border-top: var(--bd); padding: 10px 16px 14px; display: flex; justify-content: space-around; align-items: center; z-index: 100; box-shadow: 0 -4px 10px rgba(0,0,0,0.05); }
+        .bnav-item { background: transparent; border: none; outline: none; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px; font-family: var(--font-mono); font-size: 10px; font-weight: 900; color: var(--ink); opacity: 0.5; transition: all 0.2s; padding: 4px 16px; border-radius: 10px; }
+        .bnav-item svg { width: 22px; height: 22px; stroke: var(--ink); stroke-width: 2.2; fill: none; }
+        .bnav-item.active { opacity: 1; transform: translateY(-2px); }
+        .bnav-item.active svg { stroke-width: 2.8; }
+
+        .terminal-wrapper { background: var(--paper); border: var(--bd); border-radius: 16px; overflow: hidden; box-shadow: var(--sh); }
+        .terminal-bar { background: var(--brand-main); border-bottom: var(--bd); padding: 8px 12px; display: flex; justify-content: space-between; align-items: center; color: #000; }
+        .term-dots { display: flex; gap: 6px; }
+        .term-dots span { width: 12px; height: 12px; border-radius: 50%; border: 2px solid #0d0d0d; }
+        .term-dots span:nth-child(1) { background: var(--red); }
+        .term-dots span:nth-child(2) { background: var(--yellow); }
+        .term-dots span:nth-child(3) { background: var(--mint); }
+        .term-title { font-family: var(--font-mono); font-size: 11px; font-weight: 800; display: flex; align-items: center; gap: 6px; letter-spacing: 0.5px; }
+        .term-actions { display: flex; gap: 6px; }
+        .term-btn { background: var(--paper); border: 2px solid var(--ink); border-radius: 6px; padding: 2px 8px; font-family: var(--font-mono); font-size: 10px; font-weight: bold; cursor: pointer; color: var(--ink); }
+
+        .terminal-body { background: #000000; color: var(--tiktok-cyan); padding: 16px; font-family: var(--font-mono); font-size: 12px; height: 130px; overflow-y: auto; }
+        .terminal-body p { margin-bottom: 6px; line-height: 1.4; }
+        .terminal-body .sys { color: #888; }
+        .terminal-body .proc { color: #ffd23f; }
+        .terminal-body .ok { color: #7be495; }
+        .terminal-body .err { color: #ff5a5f; }
+
+        .error-msg { background: var(--red); color: #fff; padding: 12px; border-radius: 12px; border: var(--bd); text-align: center; font-weight: bold; margin-bottom: 20px; display: none; font-size: 13px; }
+
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(4px); z-index: 1000; display: none; place-items: center; padding: 20px; }
+        .modal-overlay.show { display: grid; }
+        .modal-card { background: var(--paper); border: var(--bd); border-radius: 20px; box-shadow: 8px 8px 0 var(--ink); width: 100%; max-width: 420px; padding: 24px; color: var(--ink); position: relative; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .modal-title { font-family: var(--font-display); font-size: 20px; }
+        .modal-close { background: var(--red); color: #fff; border: 2px solid var(--ink); width: 32px; height: 32px; border-radius: 8px; font-weight: bold; font-size: 18px; cursor: pointer; box-shadow: 2px 2px 0 var(--ink); }
+        
+        .theme-select-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+        .theme-card-btn { background: var(--paper); border: 2px solid var(--ink); padding: 12px; border-radius: 12px; font-family: var(--font-body); font-weight: 800; font-size: 13px; text-align: center; cursor: pointer; box-shadow: 2px 2px 0 var(--ink); transition: 0.15s; color: var(--ink); }
+
+        .btn-logout-modal { background: var(--red); color: #ffffff; border: var(--bd); border-radius: 12px; padding: 14px; font-family: var(--font-body); font-weight: 800; font-size: 15px; cursor: pointer; box-shadow: var(--sh-s); width: 100%; display: flex; justify-content: center; align-items: center; gap: 10px; }
+
+        .toast { position: fixed; top: -100px; left: 50%; transform: translateX(-50%); background: #000; color: var(--tiktok-cyan); padding: 14px 24px; border-radius: 12px; border: var(--bd); box-shadow: 0 10px 0 rgba(0,0,0,0.4); font-family: var(--font-mono); font-weight: bold; font-size: 14px; z-index: 999; transition: top 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); display: flex; align-items: center; gap: 10px; white-space: nowrap; }
+        .toast.show { top: 20px; }
+        .toast.error { background: var(--tiktok-red); color: #fff; border-color: #fff; }
+        .toast.success { background: var(--tiktok-cyan); color: #000; }
+        
+        /* --- CSS TAMBAHAN UNTUK TABEL DOWNLOAD --- */
+        .download-list { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; border-top: 2px solid var(--ink); padding-top: 10px; }
+        .dl-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; border: 2px solid var(--ink); border-radius: 10px; text-decoration: none; color: var(--ink); font-weight: 700; background: var(--bg); transition: 0.15s; }
+        .dl-item:active { transform: scale(0.98); background: var(--yellow); }
+        .dl-type { font-family: var(--font-mono); font-size: 11px; font-weight: 900; background: var(--red); color: white; padding: 2px 8px; border-radius: 4px; border: 1px solid var(--ink); }
+        .dl-type.mp3 { background: var(--mint); color: #000; }
+        .dl-type.foto { background: var(--brand-accent); color: #000; }
+    </style>
+</head>
+<body class="theme-am">
+
+    <div class="bg-toys">
+        <svg class="toy am-logo" viewBox="0 0 100 100"><circle cx="50" cy="50" r="46" fill="var(--am-dark)" stroke="#0d0d0d" stroke-width="4"/><path d="M 50 25 L 70 70 L 55 70 L 50 55 L 45 70 L 30 70 Z" fill="var(--am-blue)" stroke="#0d0d0d" stroke-width="2"/><path d="M 42 55 L 58 55" fill="none" stroke="#ffffff" stroke-width="3"/></svg>
+        <svg class="toy spotify" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#1DB954" stroke="#0d0d0d" stroke-width="1.5"/><path d="M17.9 10.9c-3.5-2.1-9.3-2.3-12.7-1.2-.5.2-1.1-.1-1.3-.6-.2-.5.1-1.1.6-1.3 3.9-1.2 10.3-1 14.3 1.4.5.3.6.9.3 1.4-.3.4-.9.6-1.2.3zm-.1 2.8c-.3.4-.8.5-1.2.3-2.9-1.8-7.4-2.3-10.8-1.2-.4.1-.9-.1-1-.5-.1-.4.1-.9.5-1 3.9-1.2 8.9-.6 12.2 1.4.4.2.5.8.3 1-.1.1-.1.1 0 0zm-1.3 2.7c-.2.3-.6.4-1 .2-2.5-1.5-5.7-1.9-9.5-1-.4.1-.8-.2-.9-.5-.1-.4.2-.8.5-.9 4.1-1 7.7-.6 10.6 1.2.3.2.4.7.3 1z" fill="#0d0d0d"/></svg>
+        <svg class="toy tiktok" viewBox="0 0 250 250"><path d="M119.2 7.5v161.8c0 23-18.7 41.7-41.7 41.7-23 0-41.7-18.7-41.7-41.7 0-23 18.7-41.7 41.7-41.7 4.8 0 9.4.8 13.7 2.3v-46c-4.5-.7-9.1-1-13.7-1C37.9 82.9 5 115.8 5 155.6c0 39.8 32.9 72.7 72.7 72.7 39.8 0 72.7-32.9 72.7-72.7V82.9c19.8 14.4 44 23 70.3 23V61.1c-38.8 0-70.3-31.5-70.3-70.3H119.2z" fill="var(--tiktok-cyan)"/><path d="M113.2 1.5v161.8c0 23-18.7 41.7-41.7 41.7-23 0-41.7-18.7-41.7-41.7 0-23 18.7-41.7 41.7-41.7 4.8 0 9.4.8 13.7 2.3v-46c-4.5-.7-9.1-1-13.7-1C31.9 76.9-1 109.8-1 149.6c0 39.8 32.9 72.7 72.7 72.7 39.8 0 72.7-32.9 72.7-72.7V76.9c19.8 14.4 44 23 70.3 23V55.1c-38.8 0-70.3-31.5-70.3-70.3H113.2z" fill="var(--tiktok-red)"/></svg>
+        <svg class="toy bintang" viewBox="0 0 24 24"><polygon points="12,2 15,9 22,9 16,14 18,21 12,17 6,21 8,14 2,9 9,9" stroke="#0d0d0d" stroke-width="1.5"/></svg>
+    </div>
+
+    <div id="toast" class="toast">Notifikasi</div>
+
+    <div class="container">
+        <div id="loginBox">
+            <div class="login-badge-tag">SECURE</div>
+            <div class="login-header">
+                <div class="login-icon-badge">
+                    <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                </div>
+                <h1>Login Panel</h1>
+                <p>Masukkan akun operator untuk akses panel</p>
+            </div>
+            <div class="error-msg" id="errorMsg">Username atau Password salah!</div>
+            <div class="form-group">
+                <label>USERNAME</label>
+                <div class="input-wrapper">
+                    <svg class="input-icon" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                    <input type="text" id="usernameInput" placeholder="Ketik username..." autocomplete="off">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>PASSWORD</label>
+                <div class="input-wrapper">
+                    <svg class="input-icon" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                    <input type="password" id="passwordInput" placeholder="Ketik password...">
+                    <button type="button" class="toggle-pass" onclick="togglePassword()">
+                        <svg id="eyeIcon" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                    </button>
+                </div>
+            </div>
+            <div>
+                <button class="btn btn-login" id="btnLogin" onclick="prosesLogin()"><span>Masuk Sekarang</span></button>
+            </div>
+        </div>
+
+        <div id="panelBox">
+            <div class="top-header">
+                <div class="brand">
+                    <span class="icon"><svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></span> AM CORE
+                </div>
+                <div class="header-actions">
+                    <div class="user-profile">
+                        <div class="avatar" id="userAvatar">A</div>
+                        <span id="welcomeText">Admin</span>
+                    </div>
+                    <button class="settings-btn" onclick="toggleSettingsModal()" title="Pengaturan">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                    </button>
+                </div>
+            </div>
+
+            <div id="viewHome">
+                <div class="hero-card" style="margin-bottom:16px;">
+                    <h2>Halo, <mark id="heroName">Operator!</mark></h2>
+                    <p id="heroDesc">Pilih layanan Alight Motion, Spotify, atau TikTok di bawah ini.</p>
+                </div>
+
+                <div class="tabs" style="margin-bottom:16px;">
+                    <button class="tab-btn am active" onclick="bukaTab('am', this)">
+                        <svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" fill="var(--am-blue)" stroke="#0d0d0d" stroke-width="2"/></svg> AM
+                    </button>
+                    <button class="tab-btn spotify" onclick="bukaTab('spotify', this)">
+                        <svg viewBox="0 0 24 24" width="22" height="22"><circle cx="12" cy="12" r="10" fill="#1DB954"/><path d="M17.9 10.9c-3.5-2.1-9.3-2.3-12.7-1.2-.5.2-1.1-.1-1.3-.6-.2-.5.1-1.1.6-1.3 3.9-1.2 10.3-1 14.3 1.4.5.3.6.9.3 1.4-.3.4-.9.6-1.2.3zm-.1 2.8c-.3.4-.8.5-1.2.3-2.9-1.8-7.4-2.3-10.8-1.2-.4.1-.9-.1-1-.5-.1-.4.1-.9.5-1 3.9-1.2 8.9-.6 12.2 1.4.4.2.5.8.3 1-.1.1-.1.1 0 0zm-1.3 2.7c-.2.3-.6.4-1 .2-2.5-1.5-5.7-1.9-9.5-1-.4.1-.8-.2-.9-.5-.1-.4.2-.8.5-.9 4.1-1 7.7-.6 10.6 1.2.3.2.4.7.3 1z" fill="#0d0d0d"/></svg> Spotify
+                    </button>
+                    <button class="tab-btn tiktok" onclick="bukaTab('tiktok', this)">
+                        <svg viewBox="0 0 250 250"><path d="M119.2 7.5v161.8c0 23-18.7 41.7-41.7 41.7-23 0-41.7-18.7-41.7-41.7 0-23 18.7-41.7 41.7-41.7 4.8 0 9.4.8 13.7 2.3v-46c-4.5-.7-9.1-1-13.7-1C37.9 82.9 5 115.8 5 155.6c0 39.8 32.9 72.7 72.7 72.7 39.8 0 72.7-32.9 72.7-72.7V82.9c19.8 14.4 44 23 70.3 23V61.1c-38.8 0-70.3-31.5-70.3-70.3H119.2z" fill="var(--tiktok-cyan)"/><path d="M113.2 1.5v161.8c0 23-18.7 41.7-41.7 41.7-23 0-41.7-18.7-41.7-41.7 0-23 18.7-41.7 41.7-41.7 4.8 0 9.4.8 13.7 2.3v-46c-4.5-.7-9.1-1-13.7-1C31.9 76.9-1 109.8-1 149.6c0 39.8 32.9 72.7 72.7 72.7 39.8 0 72.7-32.9 72.7-72.7V76.9c19.8 14.4 44 23 70.3 23V55.1c-38.8 0-70.3-31.5-70.3-70.3H113.2z" fill="var(--tiktok-red)"/></svg> TikTok
+                    </button>
+                </div>
+
+                <div id="tab-am" class="tab-content active">
+                    <div class="card-form">
+                        <div class="step-title"><span class="step-num">1</span> Kirim Tautan Ajaib</div>
+                        <p class="hint">Masukkan email target. Kami akan mengirimkan tautan verifikasi ke email tersebut.</p>
+                        <div class="input-wrapper" style="margin-bottom:16px;">
+                            <svg class="input-icon" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                            <input type="email" id="am-email" placeholder="contoh@gmail.com">
+                        </div>
+                        <button class="btn btn-send" id="btnKirimAM" onclick="amKirimEmail()">Kirim Tautan</button>
+                    </div>
+                    <div class="card-form">
+                        <div class="step-title"><span class="step-num">2</span> Verifikasi Akun</div>
+                        <p class="hint">Buka email kamu, salin tautan verifikasi, lalu tempelkan di kolom bawah ini.</p>
+                        <label>TAUTAN VERIFIKASI</label>
+                        <textarea id="am-link" rows="2" placeholder="https://alightcreative.page.link/..." style="margin-bottom:16px;"></textarea>
+                        <button class="btn btn-verify" id="btnVerifyAM" onclick="amVerifikasiEmail()">Verifikasi & Aktifkan VIP</button>
+                    </div>
+                </div>
+
+                <div id="tab-spotify" class="tab-content">
+                    <div class="card-form">
+                        <div class="step-title"><span class="step-num">1</span> Process Link Spotify</div>
+                        <p class="hint">Tempelkan link lagu/track Spotify di bawah untuk memproses dan mengambil MP3 beserta gambar cover-nya.</p>
+                        <label>LINK LAGU SPOTIFY</label>
+                        <div class="input-wrapper" style="margin-bottom:16px;">
+                            <svg class="input-icon" viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>
+                            <input type="url" id="spotify-link" placeholder="https://open.spotify.com/track/...">
+                        </div>
+                        <button class="btn btn-spotify" id="btnSpotify" onclick="prosesSpotifyTrack()">Proses Link Lagu</button>
+                        
+                        <div class="result-card" id="spResult">
+                            <div class="res-header">
+                                <img src="" alt="Album Cover" class="res-thumb" id="spThumb">
+                                <div class="res-info">
+                                    <h5 id="spTitle">Judul Lagu</h5>
+                                    <p id="spArtist">Artis Spotify</p>
+                                </div>
+                            </div>
+                            <div class="res-actions">
+                                <a href="#" target="_blank" download class="btn btn-spotify" id="spDlAudio" style="font-size:14px; padding:12px;">Download MP3</a>
+                                <a href="#" target="_blank" download class="btn btn-send" id="spDlImage" style="font-size:14px; padding:12px;">Download Cover (Foto)</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="tab-tiktok" class="tab-content">
+                    <div class="card-form">
+                        <div class="step-title"><span class="step-num">1</span> TikTok Post Downloader</div>
+                        <p class="hint">Masukkan link postingan TikTok (Video atau Slide Foto) untuk diambil No Watermark & MP3-nya.</p>
+                        <label>LINK POSTINGAN TIKTOK</label>
+                        <div class="input-wrapper" style="margin-bottom:16px;">
+                            <svg class="input-icon" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+                            <input type="url" id="tiktok-url" placeholder="https://vt.tiktok.com/ZSbm6fY8P/">
+                        </div>
+                        <button class="btn btn-tiktok" id="btnTikTok" onclick="prosesTikTokv6()">Proses Link TikTok</button>
+
+                        <div class="result-card" id="ttResult">
+                            <div class="res-header">
+                                <img src="" alt="Thumbnail" class="res-thumb" id="ttThumb">
+                                <div class="res-info">
+                                    <h5 id="ttTitle">Judul Postingan</h5>
+                                    <p id="ttAuthor">@author</p>
+                                </div>
+                            </div>
+
+                            <div class="video-wrapper" id="ttVideoContainer" style="display:none;">
+                                <video id="ttVideoPlayer" controls preload="metadata"></video>
+                            </div>
+
+                            <div id="ttPhotoContainer" style="display:none;">
+                                <label style="margin-bottom:6px;">GALERI FOTO & DOWNLOAD:</label>
+                                <div class="photo-grid" id="ttPhotoGrid"></div>
+                            </div>
+
+                            <!-- Tabel List Download -->
+                            <div class="download-list" id="ttDownloadList"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="terminal-wrapper" style="margin-top:16px;">
+                    <div class="terminal-bar">
+                        <div class="term-dots"><span></span><span></span><span></span></div>
+                        <div class="term-title">INSTALL_PROCESS.console</div>
+                        <div class="term-actions">
+                            <button class="term-btn" onclick="salinLog()">Salin</button>
+                            <button class="term-btn" onclick="hapusLog()">Hapus</button>
+                        </div>
+                    </div>
+                    <div class="terminal-body" id="terminalBody">
+                        <p class="sys">[SYSTEM] Process Terminal initialized. Ready for processing...</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="viewHistory" style="display:none;">
+                <div class="history-top-bar">
+                    <div class="hist-title-group">
+                        <h1>HISTORY</h1>
+                        <p>Your recent downloads & activity</p>
+                    </div>
+                    <button class="btn-edit-hist" onclick="hapusSemuaHistory()">HAPUS SEMUA</button>
+                </div>
+                <div class="history-list" id="historyList"></div>
+            </div>
+        </div> 
+    </div>
+
+    <div class="bottom-nav" id="bottomNav" style="display:none;">
+        <button class="bnav-item active" id="navHome" onclick="pindahLayar('home')">
+            <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+            <span>HOME</span>
+        </button>
+        <button class="bnav-item" id="navHistory" onclick="pindahLayar('history')">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+            <span>HISTORY</span>
+        </button>
+        <button class="bnav-item" id="navSettings" onclick="toggleSettingsModal()">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+            <span>SETTINGS</span>
+        </button>
+    </div>
+
+    <div class="modal-overlay" id="settingsModal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <div class="modal-title">PENGATURAN TEMA</div>
+                <button class="modal-close" onclick="toggleSettingsModal()">&times;</button>
+            </div>
+            <div class="setting-group">
+                <label>PILIH TEMA RESMI TAMPILAN</label>
+                <div class="theme-select-grid">
+                    <button class="theme-card-btn" style="background:#ffd23f; color:#000;" onclick="gantiTemaGlobal('theme-default')">Classic Yellow</button>
+                    <button class="theme-card-btn" style="background:#00E5FF; color:#000;" onclick="gantiTemaGlobal('theme-am')">Alight Cyan</button>
+                    <button class="theme-card-btn" style="background:#1DB954; color:#fff;" onclick="gantiTemaGlobal('theme-spotify')">Spotify Green</button>
+                    <button class="theme-card-btn" style="background:#ff0050; color:#fff;" onclick="gantiTemaGlobal('theme-tiktok')">TikTok Dark</button>
+                </div>
+            </div>
+            <hr style="border:1px solid var(--ink); margin: 20px 0;">
+            <button class="btn-logout-modal" onclick="logout()">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                Keluar Akun
+            </button>
+        </div>
+    </div>
+
+<script>
+    const AKUN_VALID = { username: "admin", password: "12345" };
+    let toastTimeout;
+
+    function munculkanToast(pesan, tipe = 'info') {
+        const toast = document.getElementById('toast');
+        toast.innerText = pesan;
+        toast.className = 'toast show ' + tipe;
+        clearTimeout(toastTimeout);
+        toastTimeout = setTimeout(() => { toast.className = 'toast ' + tipe; }, 3000);
+    }
+
+    function togglePassword() {
+        const passInput = document.getElementById('passwordInput');
+        const eyeIcon = document.getElementById('eyeIcon');
+        if (passInput.type === 'password') {
+            passInput.type = 'text';
+            eyeIcon.innerHTML = `<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>`;
+        } else {
+            passInput.type = 'password';
+            eyeIcon.innerHTML = `<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>`;
+        }
+    }
+
+    function toggleSettingsModal() { document.getElementById('settingsModal').classList.toggle('show'); }
+    function gantiTemaGlobal(namaTema) { document.body.className = namaTema; munculkanToast('Tema berhasil diganti!', 'success'); toggleSettingsModal(); }
+
+    function pindahLayar(layar) {
+        const viewHome = document.getElementById('viewHome');
+        const viewHistory = document.getElementById('viewHistory');
+        const navHome = document.getElementById('navHome');
+        const navHistory = document.getElementById('navHistory');
+
+        if (layar === 'home') {
+            viewHome.style.display = 'block'; viewHistory.style.display = 'none';
+            navHome.classList.add('active'); navHistory.classList.remove('active');
+        } else if (layar === 'history') {
+            viewHome.style.display = 'none'; viewHistory.style.display = 'block';
+            navHome.classList.remove('active'); navHistory.classList.add('active');
+            renderHistory();
+        }
+    }
+
+    function simpanKeHistory(tipe, judul, thumb, url) {
+        let history = JSON.parse(localStorage.getItem('mori_history') || '[]');
+        const skrg = new Date();
+        const tgl = String(skrg.getDate()).padStart(2, '0') + '/' + String(skrg.getMonth() + 1).padStart(2, '0') + '/' + String(skrg.getFullYear()).slice(-2);
+        const jam = String(skrg.getHours()).padStart(2, '0') + '.' + String(skrg.getMinutes()).padStart(2, '0');
+        const timestamp = `${tgl}, ${jam}`;
+
+        const item = { id: Date.now(), tipe: tipe, judul: judul || 'Tanpa Judul', thumb: thumb || '', url: url || '#', waktu: timestamp };
+        history.unshift(item);
+        localStorage.setItem('mori_history', JSON.stringify(history));
+    }
+
+    function renderHistory() {
+        const historyList = document.getElementById('historyList');
+        let history = JSON.parse(localStorage.getItem('mori_history') || '[]');
+
+        if (history.length === 0) {
+            historyList.innerHTML = `
+                <div class="empty-hist">
+                    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                    <p>Belum ada riwayat unduhan atau eksekusi.</p>
+                </div>
+            `;
+            return;
+        }
+
+        let html = '';
+        history.forEach(item => {
+            let thumbHTML = `<svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>`;
+            if (item.thumb) {
+                thumbHTML = `<img src="${item.thumb}" alt="Thumb" onerror="this.onerror=null; this.src='https://via.placeholder.com/60'">`;
+            }
+
+            html += `
+                <div class="history-card">
+                    <div class="hist-thumb-box">${thumbHTML}</div>
+                    <div class="hist-info">
+                        <div class="hist-item-title">${item.judul}</div>
+                        <div class="hist-meta">
+                            <span class="hist-badge ${item.tipe}">${item.tipe}</span>
+                            <span class="hist-date">${item.waktu}</span>
+                        </div>
+                    </div>
+                    <a href="${item.url}" target="_blank" class="hist-action-btn" title="Buka Link">
+                        <svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                    </a>
+                </div>
+            `;
+        });
+        historyList.innerHTML = html;
+    }
+
+    function hapusSemuaHistory() {
+        if (confirm('Yakin ingin menghapus seluruh riwayat history?')) {
+            localStorage.removeItem('mori_history'); renderHistory(); munculkanToast('History dibersihkan.', 'info');
+        }
+    }
+
+    function prosesLogin() {
+        const user = document.getElementById('usernameInput').value.trim();
+        const pass = document.getElementById('passwordInput').value.trim();
+        const errorMsg = document.getElementById('errorMsg');
+        const box = document.getElementById('loginBox');
+        const btn = document.getElementById('btnLogin');
+
+        if (user === AKUN_VALID.username && pass === AKUN_VALID.password) {
+            btn.innerHTML = '<span class="spinner"></span> Memverifikasi...';
+            btn.disabled = true;
+            setTimeout(() => {
+                errorMsg.style.display = 'none'; box.style.display = 'none';
+                document.getElementById('panelBox').style.display = 'flex'; 
+                document.getElementById('bottomNav').style.display = 'flex'; 
+                document.getElementById('welcomeText').innerText = user.charAt(0).toUpperCase() + user.slice(1);
+                document.getElementById('userAvatar').innerText = user.charAt(0).toUpperCase();
+                document.getElementById('heroName').innerText = user.charAt(0).toUpperCase() + user.slice(1) + "!";
+                localStorage.setItem('isLoggedIn', 'true'); localStorage.setItem('username', user);
+                munculkanToast('Login Berhasil!', 'success');
+                btn.innerHTML = '<span>Masuk Sekarang</span>'; btn.disabled = false;
+            }, 600);
+        } else {
+            errorMsg.style.display = 'block'; box.classList.remove('shake-error'); void box.offsetWidth; box.classList.add('shake-error');
+            document.getElementById('usernameInput').classList.add('input-error');
+            document.getElementById('passwordInput').classList.add('input-error');
+            setTimeout(() => {
+                document.getElementById('usernameInput').classList.remove('input-error');
+                document.getElementById('passwordInput').classList.remove('input-error');
+            }, 500);
+            munculkanToast('Username atau Password Salah!', 'error');
+        }
+    }
+
+    function logout() {
+        document.getElementById('settingsModal').classList.remove('show');
+        document.getElementById('panelBox').style.display = 'none'; document.getElementById('bottomNav').style.display = 'none';
+        document.getElementById('loginBox').style.display = 'block';
+        document.getElementById('usernameInput').value = ''; document.getElementById('passwordInput').value = '';
+        localStorage.removeItem('isLoggedIn'); localStorage.removeItem('username');
+        document.getElementById('errorMsg').style.display = 'none';
+        munculkanToast('Berhasil Keluar.', 'info');
+    }
+
+    window.onload = function() {
+        if (localStorage.getItem('isLoggedIn') === 'true') {
+            const user = localStorage.getItem('username') || 'Admin';
+            document.getElementById('loginBox').style.display = 'none';
+            document.getElementById('panelBox').style.display = 'flex'; document.getElementById('bottomNav').style.display = 'flex';
+            document.getElementById('welcomeText').innerText = user.charAt(0).toUpperCase() + user.slice(1);
+            document.getElementById('userAvatar').innerText = user.charAt(0).toUpperCase();
+            document.getElementById('heroName').innerText = user.charAt(0).toUpperCase() + user.slice(1) + "!";
+        } else {
+            document.getElementById('loginBox').style.display = 'block';
+        }
+    };
+
+    function bukaTab(namaTab, btnElement) {
+        document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        document.getElementById('tab-' + namaTab).classList.add('active');
+        btnElement.classList.add('active');
+        document.body.className = ''; document.body.classList.add('theme-' + namaTab);
+
+        const heroDesc = document.getElementById('heroDesc');
+        if (namaTab === 'am') heroDesc.innerText = 'Kelola aktivasi & verifikasi akun Alight Motion VIP.';
+        else if (namaTab === 'spotify') heroDesc.innerText = 'Proses link lagu Spotify untuk mengekstrak file audio MP3 & Foto Cover.';
+        else if (namaTab === 'tiktok') heroDesc.innerText = 'Download postingan TikTok (Video No WM Playable atau Slide Foto + MP3).';
+    }
+
+    function logTeks(pesan, tipe = 'ok') {
+        const logDiv = document.getElementById('terminalBody');
+        const waktu = new Date().toLocaleTimeString('id-ID');
+        let warnaClass = 'ok'; let prefix = '[OK]';
+        if (tipe === 'err') { warnaClass = 'err'; prefix = '[ERR]'; }
+        else if (tipe === 'proc') { warnaClass = 'proc'; prefix = '[EXEC]'; }
+        else if (tipe === 'sys') { warnaClass = 'sys'; prefix = '[SYS]'; }
+        logDiv.innerHTML += `<p class="${warnaClass}"><span style="color:#666">[${waktu}]</span> ${prefix} ${pesan}</p>`;
+        logDiv.scrollTop = logDiv.scrollHeight;
+    }
+
+    function salinLog() { navigator.clipboard.writeText(document.getElementById('terminalBody').innerText).then(() => munculkanToast('Log berhasil disalin!', 'success')); }
+    function hapusLog() { document.getElementById('terminalBody').innerHTML = '<p class="sys">[SYSTEM] Log dibersihkan.</p>'; munculkanToast('Log dibersihkan.', 'info'); }
+
+    /* --- AM FUNCTION (DISABLED SEMENTARA) --- */
+    async function amKirimEmail() { munculkanToast('Fitur AM sedang offline / perbaikan.', 'error'); }
+    async function amVerifikasiEmail() { munculkanToast('Fitur AM sedang offline / perbaikan.', 'error'); }
+
+    /* --- SPOTIFY FUNCTION (DISABLED SEMENTARA) --- */
+    async function prosesSpotifyTrack() { munculkanToast('Fitur Spotify sedang offline / perbaikan.', 'error'); }
+
+    /* --- TIKTOK DOWNLOADER (VERSI VERCEL API DENGAN VIDEO PLAYER & TABEL DOWNLOAD) --- */
+    async function prosesTikTokv6() {
+        const inputUrl = document.getElementById('tiktok-url');
+        const url = inputUrl.value.trim();
+        const btn = document.getElementById('btnTikTok');
+        const resultCard = document.getElementById('ttResult');
+
+        if (!url) {
+            inputUrl.classList.add('input-error');
+            setTimeout(() => inputUrl.classList.remove('input-error'), 500);
+            return munculkanToast('Link TikTok wajib dimasukkan!', 'error');
+        }
+
+        btn.innerHTML = '<span class="spinner"></span> Mengunduh Data...';
+        btn.disabled = true;
+        resultCard.style.display = 'none';
+        logTeks(`Executing TikTok parser for: ${url}`, 'proc');
+
+        try {
+            // NEMBAK API VERCEL KITA
+            const response = await fetch(`/api/tiktok?url=${encodeURIComponent(url)}`);
+            const data = await response.json();
+            
+            logTeks(`Response status 200: Data stream received.`, 'sys');
+
+            if (data && data.success) {
+                const titleText = data.title || 'Postingan TikTok';
+                const thumbImg = data.thumbnail || 'https://via.placeholder.com/100';
+                const videoUrl = data.video_url;
+                const audioUrl = data.audio_url;
+
+                document.getElementById('ttTitle').innerText = titleText;
+                document.getElementById('ttAuthor').innerText = data.author || '@tiktok_user';
+                document.getElementById('ttThumb').src = thumbImg;
+
+                const videoContainer = document.getElementById('ttVideoContainer');
+                const videoPlayer = document.getElementById('ttVideoPlayer');
+                const photoContainer = document.getElementById('ttPhotoContainer');
+                const photoGrid = document.getElementById('ttPhotoGrid');
+                const dlList = document.getElementById('ttDownloadList');
+
+                photoGrid.innerHTML = ''; dlList.innerHTML = ''; videoPlayer.src = '';
+
+                if (data.photos && data.photos.length > 0) {
+                    logTeks(`TYPE DETECTED: Photo Slideshow (${data.photos.length} foto)`, 'ok');
+                    videoContainer.style.display = 'none';
+                    photoContainer.style.display = 'block';
+
+                    data.photos.forEach((imgUrl, index) => {
+                        const item = document.createElement('div');
+                        item.className = 'photo-item';
+                        item.innerHTML = `<img src="${imgUrl}">`;
+                        photoGrid.appendChild(item);
+
+                        dlList.innerHTML += `
+                            <a href="${imgUrl}" target="_blank" download="Mori_Foto_${index+1}.jpg" class="dl-item">
+                                <span>Download Foto ${index + 1}</span>
+                                <span class="dl-type foto">JPG</span>
+                            </a>
+                        `;
+                    });
+                    simpanKeHistory('tiktok', titleText, thumbImg, data.photos[0]);
+
+                } else if (videoUrl) {
+                    logTeks('TYPE DETECTED: Standard Video Post', 'ok');
+                    photoContainer.style.display = 'none';
+                    videoContainer.style.display = 'block';
+                    
+                    videoPlayer.src = videoUrl;
+                    videoPlayer.load();
+
+                    dlList.innerHTML += `
+                        <a href="${videoUrl}" target="_blank" download="Mori_Video_NoWM.mp4" class="dl-item">
+                            <span>Download Video (No WM)</span>
+                            <span class="dl-type">VIDEO</span>
+                        </a>
+                    `;
+                    simpanKeHistory('tiktok', titleText, thumbImg, videoUrl);
+                }
+
+                if (audioUrl) {
+                    dlList.innerHTML += `
+                        <a href="${audioUrl}" target="_blank" download="Mori_Audio.mp3" class="dl-item">
+                            <span>Download Audio</span>
+                            <span class="dl-type mp3">MP3</span>
+                        </a>
+                    `;
+                }
+
+                resultCard.style.display = 'block';
+                logTeks('MOUNTING COMPLETE: All assets ready.', 'ok');
+                munculkanToast('Berhasil mengambil data TikTok!', 'success');
+            } else {
+                logTeks('PARSER ERROR: ' + (data.error || 'Unknown Error'), 'err');
+                munculkanToast(data.error || 'Gagal memproses link TikTok.', 'error');
+            }
+        } catch (error) {
+            logTeks(`INSTALLATION EXCEPTION: ${error.message}`, 'err');
+            munculkanToast('Error Koneksi API TikTok', 'error');
+        } finally {
+            btn.innerHTML = 'Proses Link TikTok';
+            btn.disabled = false;
+        }
+    }
+</script>
+
+</body>
+</html>
